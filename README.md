@@ -67,25 +67,22 @@ npm install
 cd frontend
 npm install
 cd ..
-2. Kompilasi Smart Contract
-Bash
+```
+
+### 2. Kompilasi Smart Contract
 
 # Pastikan Anda berada di direktori root
 npx hardhat compile
-3. Menjalankan Proyek
 Buka dua terminal di direktori root proyek.
 
 Di Terminal 1 (Untuk Blockchain Lokal):
-
-Bash
-
 npx hardhat node
 Biarkan terminal ini tetap berjalan.
 
 Di Terminal 2 (Untuk Deploy & Frontend):
 
-Bash
 
+### 3. Menjalankan Proyek
 # 1. Deploy kontrak ke jaringan lokal
 npx hardhat run scripts/deploy.js --network localhost
 
@@ -101,7 +98,7 @@ npx hardhat run scripts/deploy.js --network localhost
 cd frontend
 npm run dev
 
-4. Konfigurasi MetaMask
+### 4. Konfigurasi MetaMask
 Buka browser dan hubungkan MetaMask.
 Tambahkan jaringan baru dengan konfigurasi:
 Network Name: Hardhat Local
