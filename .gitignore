@@ -1,0 +1,18 @@
+# Dependencies
+/node_modules
+/frontend/node_modules
+
+# Hardhat
+/artifacts
+/cache
+/coverage
+coverage.json
+typechain-types
+
+# Next.js
+/frontend/.next
+/frontend/out
+
+# Lainnya
+.env
+*.log
