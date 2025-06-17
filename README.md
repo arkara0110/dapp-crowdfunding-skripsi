@@ -6,7 +6,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-black?style=for-the-badge&logo=tailwind-css)
 ![Wagmi](https://img.shields.io/badge/Wagmi-2.9.10-blue?style=for-the-badge&logo=ethereum)
 
-![Crowdfunding dApp](https://i.imgur.com/2b3b06.png) ## 💡 Deskripsi Proyek
+ 💡 Deskripsi Proyek
 
 **Crowdfunding dApp** adalah implementasi nyata sebuah platform penggalangan dana terdesentralisasi (dApp) yang dibangun di atas teknologi blockchain. Proyek ini dibuat untuk memenuhi syarat kelulusan dan mendemonstrasikan bagaimana teknologi Web3 dapat menciptakan sistem crowdfunding yang lebih transparan, efisien, dan tanpa perantara dibandingkan dengan platform Web2 tradisional.
 
@@ -100,6 +100,7 @@ npx hardhat run scripts/deploy.js --network localhost
 # 4. Jalankan aplikasi frontend
 cd frontend
 npm run dev
+
 4. Konfigurasi MetaMask
 Buka browser dan hubungkan MetaMask.
 Tambahkan jaringan baru dengan konfigurasi:
