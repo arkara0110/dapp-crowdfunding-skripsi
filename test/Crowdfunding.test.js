@@ -2,6 +2,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+// npx hardhat test
+
 async function getBigIntBalance(address) {
   const balance = await ethers.provider.getBalance(address);
   return BigInt(balance.toString());

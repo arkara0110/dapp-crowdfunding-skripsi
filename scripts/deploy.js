@@ -1,6 +1,8 @@
 // scripts/deploy.js
 const hre = require("hardhat");
 
+// npx hardhat run scripts/deploy.js --network localhost
+
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log("Deploying contract with account:", deployer.address);
@@ -16,6 +18,7 @@ async function main() {
   // PASTIKAN PANGGILAN FUNGSI INI MEMILIKI 4 ARGUMEN
   const now = Math.floor(Date.now() / 1000);
   const deadline = now + 86400 * 365; // Set deadline 1 TAHUN dari sekarang
+  // const deadline = now + 180; // Testing deadline 180 detik dari sekarang
 
   const tx = await contract.createCampaign(
     "Bantu Renovasi Panti Asuhan", // Argumen 1: _title

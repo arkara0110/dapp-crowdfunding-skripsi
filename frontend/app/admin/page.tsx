@@ -11,8 +11,8 @@ import { parseEther, formatEther } from "viem";
 import toast from "react-hot-toast";
 
 import { CROWDFUNDING_ABI, CROWDFUNDING_CONTRACT_ADDRESS } from "@/constants";
-import Link from "next/link";
 
+// Definisikan tipe data untuk Campaign
 type Campaign = {
   id: bigint;
   title: string;
@@ -21,26 +21,27 @@ type Campaign = {
   deadline: bigint;
   amountCollected: bigint;
   active: boolean;
+  donationsCount: bigint;
 };
 
 export default function AdminPage() {
   const { address: connectedAddress, isConnected } = useAccount();
 
-  // --- State untuk Form Create Campaign ---
+  // State untuk Form Create Campaign
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [target, setTarget] = useState("");
   const [deadline, setDeadline] = useState("");
 
-  // --- State untuk melacak ID kampanye yang sedang diproses withdraw ---
+  // State untuk melacak ID kampanye yang sedang diproses withdraw
   const [processingId, setProcessingId] = useState<bigint | null>(null);
 
-  // --- Hook untuk semua transaksi TULIS (Create dan Withdraw) ---
+  // Hook untuk semua transaksi TULIS (Create dan Withdraw)
   const { data: hash, error, isPending, writeContract } = useWriteContract();
   const { isLoading: isTxLoading, isSuccess: isTxSuccess } =
     useWaitForTransactionReceipt({ hash });
 
-  // --- Hook untuk BACA data ---
+  // Hook untuk BACA data
   const { data: ownerAddress, isLoading: isLoadingOwner } = useReadContract({
     address: CROWDFUNDING_CONTRACT_ADDRESS,
     abi: CROWDFUNDING_ABI,
@@ -57,17 +58,32 @@ export default function AdminPage() {
     functionName: "getAllCampaigns",
   });
 
-  // --- Fungsi Handler ---
+  // --- Fungsi Handler untuk Submit Form ---
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !target || !deadline) {
       toast.error("Harap isi semua kolom.");
       return;
     }
+
+    // --- VALIDASI DEADLINE DI SISI KLIEN ---
+    const today = new Date();
+    const selectedDate = new Date(deadline);
+    // Set jam ke 0 untuk membandingkan tanggal saja, mengabaikan waktu
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      toast.error("Batas waktu (deadline) tidak boleh di masa lalu.");
+      return; // Hentikan eksekusi jika tanggal tidak valid
+    }
+    // --- AKHIR VALIDASI ---
+
+    // Konversi input ke format yang benar untuk smart contract
     const targetInWei = parseEther(target);
     const deadlineInSeconds = BigInt(
       Math.floor(new Date(deadline).getTime() / 1000)
     );
+
     writeContract({
       address: CROWDFUNDING_CONTRACT_ADDRESS,
       abi: CROWDFUNDING_ABI,
@@ -77,7 +93,7 @@ export default function AdminPage() {
   };
 
   const handleWithdraw = (campaignId: bigint) => {
-    setProcessingId(campaignId);
+    setProcessingId(campaignId); // Tandai campaign ini sedang diproses
     writeContract({
       address: CROWDFUNDING_CONTRACT_ADDRESS,
       abi: CROWDFUNDING_ABI,
@@ -86,9 +102,11 @@ export default function AdminPage() {
     });
   };
 
+  // Efek setelah transaksi berhasil
   useEffect(() => {
     if (isTxSuccess) {
-      toast.success("Transaksi berhasil!", { duration: 5000 });
+      toast.success("Transaksi berhasil!", { duration: 4000 });
+      // Reset form
       setTitle("");
       setDescription("");
       setTarget("");
@@ -98,9 +116,9 @@ export default function AdminPage() {
     }
     if (error) {
       if (error.message.includes("User rejected the request")) {
-        toast.error("Anda membatalkan transaksi.", { duration: 5000 });
+        toast.error("Anda membatalkan transaksi.", { duration: 4000 });
       } else {
-        toast.error(`Transaksi Gagal: ${error.message}`, { duration: 5000 });
+        toast.error(`Transaksi Gagal: Coba lagi nanti.`, { duration: 5000 });
       }
       setProcessingId(null);
     }
@@ -116,9 +134,7 @@ export default function AdminPage() {
   // Gerbang pengaman untuk non-pemilik
   if (!isConnected || connectedAddress !== ownerAddress) {
     return (
-      // Gunakan flexbox untuk memposisikan konten di tengah secara vertikal dan horizontal
       <main className="flex flex-col items-center justify-center text-center py-20">
-        {/* Ikon Gembok untuk visual */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-20 w-20 text-red-500 mb-6"
@@ -133,20 +149,11 @@ export default function AdminPage() {
             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
           />
         </svg>
-
         <h1 className="text-4xl font-bold text-red-500 mb-4">Akses Ditolak</h1>
         <p className="max-w-md text-slate-400">
           Halaman ini hanya untuk pemilik (admin). Silakan hubungkan dompet
           pemilik untuk melanjutkan.
         </p>
-
-        {/* Tombol untuk kembali ke halaman utama */}
-        <Link
-          href="/"
-          className="mt-8 bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-700 transition-colors"
-        >
-          Kembali ke Beranda
-        </Link>
       </main>
     );
   }
@@ -157,7 +164,6 @@ export default function AdminPage() {
         <h2 className="text-2xl font-semibold mb-6 text-white">
           Selamat Datang, Admin!
         </h2>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Kolom untuk Membuat Kampanye Baru */}
           <div className="bg-slate-800/50 p-6 rounded-lg border border-white/10 h-fit">
@@ -236,7 +242,6 @@ export default function AdminPage() {
               </button>
             </form>
           </div>
-
           {/* Kolom untuk Mengelola Kampanye */}
           <div className="bg-slate-800/50 p-6 rounded-lg border border-white/10">
             <h3 className="text-xl font-bold mb-4 text-white">
@@ -247,7 +252,6 @@ export default function AdminPage() {
                 (campaigns as Campaign[]).map((campaign) => {
                   const nowInSeconds = BigInt(Math.floor(Date.now() / 1000));
                   const isExpired = campaign.deadline <= nowInSeconds;
-
                   let statusText = "Aktif";
                   let statusColor = "bg-green-500/20 text-green-400";
                   if (!campaign.active) {
@@ -257,7 +261,6 @@ export default function AdminPage() {
                     statusText = "Berakhir";
                     statusColor = "bg-red-500/20 text-red-400";
                   }
-
                   return (
                     <div
                       key={campaign.id.toString()}
@@ -283,8 +286,8 @@ export default function AdminPage() {
                         }
                         className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed disabled:text-gray-400"
                       >
-                        {(isPending || isTxLoading) &&
-                        processingId === campaign.id
+                        {isPending ||
+                        (isTxLoading && processingId === campaign.id)
                           ? "Memproses..."
                           : "Tarik Dana"}
                       </button>
